@@ -4,6 +4,8 @@ var runSequence = require('run-sequence');
 var datetime = require('node-datetime');
 var rimraf = require('rimraf');
 var findInFiles = require('find-in-files');
+var exec = require('gulp-exec');
+var glob = require("glob")
 
 var GulpDeployTest = 'C:\\gulp_deploy_test';
 var GitRepo = 'https://github.com/gonzalompp/gulp-example-project.git';
@@ -86,6 +88,17 @@ function compare_tables(a,b) {
 var folder_work = '../../git-test/';
 const testFolder = folder_work+'db';
 
+
+gulp.task('',function() {
+    glob(folder_work+"src//*.js", options, function (er, files) {
+      // files is an array of filenames.
+      // If the `nonull` option is set, and nothing
+      // was found, then files is ["**/*.js"]
+      // er is an error object or null.
+    })
+});
+
+
 gulp.task('finde-in-files',function(){
     findInFiles.findSync(
         "(from [A-Z.a-z_]+)|(FROM [A-Z.a-z_]+)"+
@@ -137,6 +150,34 @@ gulp.task('finde-in-files',function(){
         }
 
         console.log(table_list);
+
+        var fs = require('fs')
+        var logger = fs.createWriteStream('./log.txt', {
+          flags: 'a' // 'a' means appending (old data will be preserved)
+       });
+
+       logger.write('Se realizó la ejecución de un nuevo Deploy para la OC'+ocName+', '+descDeploy+' \r\n\r\n');
+
+       //Head de correo
+       logger.write('Información del deploy \r\n\r\n');
+       logger.write('EJECUCIÓN    : '+formattedDate+' \r\n');
+       logger.write('REPOSITORIO  : '+GitRepo+' \r\n');
+       logger.write('GIT TAG NAME : '+tagVersion+' \r\n');
+       logger.write('PATH DEPLOY  : '+GulpDeployTest+' \r\n\r\n');
+
+       logger.write('Tablas incluidas en el deploy, por package: \r\n\r\n');
+        for (var i=0;i<table_list.length;i++) {
+            let fileName = table_list[i].file;
+            let fileNameSplit = fileName.split("\\");
+            logger.write('En archivo: '+fileNameSplit[fileNameSplit.length-1]+' \r\n');
+
+            for (var j=0;j<table_list[i].tables.length;j++) {
+                logger.write('- '+table_list[i].tables[j]+' \r\n');
+            }
+
+            logger.write('\r\n\r\n');
+        }
+        logger.end();
     });
 });
 

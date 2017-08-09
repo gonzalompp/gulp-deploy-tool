@@ -1,0 +1,176 @@
+Se realizó la ejecución de un nuevo Deploy para la OC8836, ciclo2 
+
+Información del deploy 
+
+EJECUCIÓN    : 08/09/17 18:10 
+REPOSITORIO  : https://github.com/gonzalompp/gulp-example-project.git 
+GIT TAG NAME : 8836-ciclo2-170809181014 
+PATH DEPLOY  : C:\gulp_deploy_test 
+
+Tablas incluidas en el deploy, por package: 
+
+En archivo: Script Job Seguimiento.pkb 
+- acciones 
+- acciones_indicadores_etq 
+- ambitos 
+- ejecucion_plan_institucional 
+- indicador_vcm_etiqueta 
+- indicador_vcm_formato 
+- indicador_vcm_homologado 
+- iniciativas_ejes 
+- instrumento_verificacion 
+- metas_etq 
+- parametros_generales 
+- plan_finicio 
+- planificaciones 
+- programas 
+- sede_unidades 
+- siga.personas 
+- v_mes_inicio 
+
+
+En archivo: PKG_SIR_VCM_PLINS_EXTACAD.pkb 
+- acciones 
+- actores_clave 
+- archivos_vcm 
+- ext_academica_plins 
+- ext_archivos 
+- ext_areas 
+- ext_colaborador_sede 
+- ext_eje_tematico 
+- ext_formatos 
+- ext_objetivo 
+- ext_socios 
+- ext_sub_temas 
+- ext_subtemas_plin 
+- grupos_interes_vcm 
+- iniciativas_ejes 
+- metas_etq 
+- planificaciones_carreras 
+- sede_unidades 
+- siga.areas_academicas 
+- siga.personas 
+- tipo_archivo 
+
+
+En archivo: PKG_SIR_VCM_PLAN_INSTITUCIONAL.pkb 
+- acciones 
+- acciones_indicadores_etq 
+- actividades_integracion_vcm 
+- actores_clave 
+- ambitos 
+- ambitos_iniciativas_ejes 
+- archivos_vcm 
+- convenios_vcm 
+- convenios_vcm_indicadores 
+- ejecucion_plan_institucional 
+- ext_academica_ejecucion 
+- ext_academica_plins 
+- ext_colaborador_sede 
+- ext_formatos 
+- grupos_interes_vcm 
+- inacap.sedes 
+- indicador_vcm_etiqueta 
+- indicador_vcm_homologado 
+- iniciativas_ejes 
+- iniciativas_ejes_lin_acci 
+- lineas_de_accion 
+- log_estado_email 
+- metas_etq 
+- parametros_generales 
+- planificacion_colaborador_sede 
+- planificaciones 
+- planificaciones_archivos 
+- planificaciones_beneficiarios 
+- planificaciones_carreras 
+- planificaciones_convenios 
+- planificaciones_indi_conv 
+- planificaciones_socios 
+- programas 
+- security.usuarios 
+- sede_unidades 
+- siga.areas_academicas 
+- siga.carreras 
+- siga.periodos_academicos 
+- siga.personas 
+- tipo_actividades_vcm 
+
+
+En archivo: PKG_SIR_VCM_EXT_ACA_EJEC_PI.pkb 
+- archivos_vcm 
+- ext_acad_ejec_archivo 
+- ext_academica_ejecucion 
+- ext_academica_plins 
+- ext_formatos 
+- participacion_vcm 
+- tipo_archivo 
+
+
+En archivo: PKG_SIR_VCM_EJEC_PLANINST.pkb 
+- acciones 
+- acciones_indicadores_etq 
+- ambitos 
+- archivos_vcm 
+- ejec_finicio 
+- ejecucion_archivos 
+- ejecucion_plan_institucional 
+- indicador_vcm_etiqueta 
+- indicador_vcm_formato 
+- indicador_vcm_homologado 
+- iniciativas_ejes 
+- instrumento_verificacion 
+- log_estado_email 
+- metas_etq 
+- notificaciones_ejec_plan 
+- parametros_generales 
+- participacion_sdo_proposito 
+- participacion_vcm 
+- participante_vcm 
+- planificaciones 
+- programas 
+- resultado_archivo 
+- resultado_metas 
+- sede_unidades 
+- siga.personas 
+- tipos_usos_indicador 
+
+
+En archivo: PKG_SIR_VCM_ANALISIS_ESTRATEG.pkb 
+- analisis_estrategico 
+- analisis_estrategico_archivo 
+- archivos_vcm 
+- sede_unidades 
+- siga.personas 
+- tipo_archivo 
+
+
+En archivo: PKG_SIR_VCM.pkb 
+- actividades_vcm_archivos 
+- analisis_estrategico 
+- analisis_estrategico_archivo 
+- archivos_vcm 
+- dotacion_hr.otec_tipo_empleado 
+- ejecucion_archivos 
+- ext_acad_ejec_archivo 
+- ext_archivos 
+- inacap.sedes 
+- log_estado_email 
+- parametros_generales 
+- permisos_roles 
+- plan_integracion_archivo 
+- planificaciones_archivos 
+- roles_asociados_vcm 
+- roles_vcm 
+- security.usuarios 
+- sede_unidades 
+- siga.actividades_periodos 
+- siga.areas_academicas 
+- siga.periodos_academicos 
+- siga.personas 
+- tipo_archivo 
+
+
+En archivo: InsertGenericoParametrosgenerales.pkb 
+- parametros_generales 
+
+

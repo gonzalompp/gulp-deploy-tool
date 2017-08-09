@@ -13,6 +13,8 @@
     "run-sequence": "^2.1.0"
   },
   "dependencies": {
+    "config": "^1.26.1",
+    "find-in-files": "^0.4.0",
     "gulp-git": "^2.4.2",
     "node-datetime": "^2.0.0",
     "rimraf": "^2.6.1"

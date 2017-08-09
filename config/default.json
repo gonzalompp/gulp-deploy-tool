@@ -1,0 +1,9 @@
+{
+  "NombreOC": "OC8860",
+  "DeployTo": "C:\\gulp_deploy_test",
+  "DeployDescription": "Ciclo4",
+  "PackageList": [
+      "PKG_SIR_VCM_EJEC_PLANINST",
+      "PKG_SIR_VCM_PLAN_INSTITUCIONAL",
+  ]
+}

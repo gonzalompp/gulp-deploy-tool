@@ -4,8 +4,11 @@ var runSequence = require('run-sequence');
 var datetime = require('node-datetime');
 var rimraf = require('rimraf');
 var findInFiles = require('find-in-files');
-var exec = require('gulp-exec');
+var exec = require('child_process').exec;
 var glob = require("glob")
+var msbuild = require("gulp-msbuild");
+var tmp = require('tmp');
+
 
 var GulpDeployTest = 'C:\\gulp_deploy_test';
 var GitRepo = 'https://github.com/gonzalompp/gulp-example-project.git';
@@ -19,6 +22,11 @@ var ocName = '8836';
 var descDeploy = 'ciclo2';
 var tagName = dt.format('ymdHMS');
 var tagVersion = ocName+'-'+descDeploy+'-'+tagName;
+
+// TEMP FOLDERS
+var tmpobj = tmp.dirSync();
+var gitfolder = tmpobj.name+'\\git\\';
+var deployfolder = tmpobj.name+'\temp\\';
 
 
 gulp.task('deploy', function(){
@@ -50,20 +58,23 @@ console.log('EJECUCIÓN   : '+formattedDate);
 console.log('REPOSITORIO : '+GitRepo);
 console.log('DEPLOY TO   : '+GulpDeployTest);
 console.log('TAG NAME    : '+tagName);
+console.log('TEMP FOLDER : '+tmpobj.name);
 console.log('');
 
 console.log('======================');
 console.log('=      EJECUTANDO    =');
 console.log('======================');
 
+
+
 //run sequence
 runSequence('clone',function(){
     console.log('Ejecución terminada');
+    // Manual cleanup
+    tmp.setGracefulCleanup();
 });
 
 });
-
-
 
 //tablas no validas
 var tablas_no_validas = [
@@ -76,31 +87,25 @@ var tablas_no_validas = [
 ];
 
 
-function compare_tables(a,b) {
-  if (a.table < b.table)
-    return -1;
-  if (a.table > b.table)
-    return 1;
-  return 0;
-}
-
-
-var folder_work = '../../git-test/';
+var folder_work = 'C:\\git-test-v4\\';
 const testFolder = folder_work+'db';
 
-
-gulp.task('',function() {
-    glob(folder_work+"src//*.js", options, function (er, files) {
-      // files is an array of filenames.
-      // If the `nonull` option is set, and nothing
-      // was found, then files is ["**/*.js"]
-      // er is an error object or null.
-    })
+gulp.task("msbuild", function() {
+    return gulp.src("C:/GitAcidLabs/gulp-example-project/src/GulpExampleProject/GulpExampleProject/GulpExampleProject.csproj")
+        .pipe(msbuild({
+            stdout: true,
+            customArgs: ['/p:DeployOnBuild=true','/p:OutputPath=C:\\gulp_deploy_test']
+        }));
 });
 
 
-gulp.task('finde-in-files',function(){
-    findInFiles.findSync(
+
+var folder_work_search = '../../git-test/';
+var testFolderSearch = folder_work_search+'db/';
+
+gulp.task('tables-pkg',function(cb){
+    console.log('Tables PKG en ejecución: '+testFolderSearch);
+    findInFiles.find(
         "(from [A-Z.a-z_]+)|(FROM [A-Z.a-z_]+)"+
         "|(join [A-Z.a-z_]+)|(JOIN [A-Z.a-z_]+)"+
         "|(update [A-Z.a-z_]+)"+
@@ -108,9 +113,10 @@ gulp.task('finde-in-files',function(){
         "|(insert into [A-Z.a-z_]+)"+
         "|(insert INTO [A-Z.a-z_]+)"+
         "|(insert into [A-Z.a-z_]+)"+
-        "|(INSERT INTO [A-Z.a-z_]+)"+
-        "", testFolder, '.pkb$')
+        "|(INSERT INTO [A-Z.a-z_]+)"
+        , testFolderSearch, '.pkb$')
     .then(function(results) {
+        console.log('Resultados:');
 
         var table_list = [];
 
@@ -178,6 +184,8 @@ gulp.task('finde-in-files',function(){
             logger.write('\r\n\r\n');
         }
         logger.end();
+
+
     });
 });
 
@@ -200,15 +208,15 @@ gulp.task('read-files',function(){
 });
 
 gulp.task('clone', function(cb) {
-    rimraf(folder_work,function(){
+    rimraf(gitfolder,function(){
         console.log('Remove dir OK');
-        git.clone(GitRepo, {args: folder_work}, function(err) {
+        git.clone(GitRepo, {args: gitfolder}, function(err) {
             if (err) throw err;
             console.log('Clone OK');
-            git.tag(tagVersion, '', { cwd: folder_work }, function (err) {
+            git.tag(tagVersion, '', { cwd: gitfolder }, function (err) {
               if (err) throw err;
               console.log('TAG OK');
-              git.push('origin', 'master', {args: '--tags', cwd: folder_work}, function (err) {
+              git.push('origin', 'master', {args: '--tags', cwd: gitfolder}, function (err) {
                 if (err) throw err;
                 console.log('PUSH OK');
                 cb();

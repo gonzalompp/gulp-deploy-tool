@@ -8,7 +8,8 @@ var exec = require('child_process').exec;
 var glob = require("glob")
 var msbuild = require("gulp-msbuild");
 var tmp = require('tmp');
-
+var fs = require('fs');
+var nuget = require('gulp-nuget');
 
 var GulpDeployTest = 'C:\\gulp_deploy_test';
 var GitRepo = 'https://github.com/gonzalompp/gulp-example-project.git';
@@ -26,28 +27,71 @@ var tagVersion = ocName+'-'+descDeploy+'-'+tagName;
 // TEMP FOLDERS
 var tmpobj = tmp.dirSync();
 var gitfolder = tmpobj.name+'\\git\\';
-var deployfolder = tmpobj.name+'\temp\\';
-
+var deployfolder = tmpobj.name+'\deploy\\';
+var csjproj = '';
+var sln = '';
 
 gulp.task('deploy', function(){
 console.log('');
+console.log('    ░─░──░▓░─░▓▓▓▒─░▒▓▓▒░░▓▓▓░░▒▓▓▓─░▒░───');
+console.log('    ─────▒▒▒▒░░─░▒▒▒───▒▒░──░▒▒░──▒▒▒▒▒───');
+console.log('    ░───▒▓──░░░░░─░░░░░░░░░░░░░░░░░░─░▓▒──');
+console.log('    ░───▒▓░░░░░▒░░░▒▒▒░▒░▒░░░░░▒▒▒░░░▒▓▒──');
+console.log('    ░────▓▒──▒░─░─░░░░░░░──░░░░░░░░░░▒█───');
+console.log('    ─────▓▓░▒▓▒▒▒▒▒▒▒░░──░▒▒░░────▒▒─░▒───');
+console.log('    ░───▓█▓█████████████▓████████████▓██──');
+console.log('    ────▓█▓██████████████████████████▓██──');
+console.log('    ░────▓██░─────────▒███─────░▒▒▒▒███▒──');
+console.log('    ░────▒██▒────░▓▓▒─▓███─░▓▓──────██▒───');
+console.log('    ─────░▒██────▓███▒█▒─█▓▓██▓░───██▓────');
+console.log('    ░────▒▒██▒─▒░▒██▓▓█──██▒█▓▓─░░░██▓▒───');
+console.log('    ─────▓▒▓█▓▒▒▒▒▒▒─██░─██─▒▒▒▒▒▒▒██▓▒───');
+console.log('    ░─░──░▓▒█░▒▒▒▒▒▒▒██▒─██▒░░▒▒▒▒░▒█▓░───');
+console.log('    ─░────▓░▓▒▒▓░▓█████▒▒▓████░░▓▓░▒▒▓───░');
+console.log('    ░─────▒─░▒░▓─▓██▓▒░─▓▒▒▓██▒─▓▒▒▒▒▓────');
+console.log('    ─░───░▓░░░─▒▓──────░▓▒─────▓▒─░░░▓░──░');
+console.log('    ░─░──░▓▒░░░░▓▓░─░░░░▒▒░──░▓▓░░▒░░▓░───');
+console.log('    ░░────▓▓░░░░░▓▓▓▒────░─▒▓▓▒░░▒░░░▓────');
+console.log('    ░─────▓▒░░░░░░░▓▓█▓▓▓▓█▓▓░░░░░░░▓▓────');
+console.log('    ░────▓▓░░░░░░▒░─░▓─▓█─▓▒─░░░▒▓▓░▒▓▓───');
+console.log('    ░───░▓▒░░▒▓░▒░░░░▓░▓█─▓▓─░░░▓▓▓─▒▒▓▒──');
+console.log('    ░───▓░▒░░░▒░▒░░▒░▓▓▓▓▓▓░▒░░░▓▓░░▒▒░▓──');
+console.log('    ░───▓─▒▓░░░▓▓░░▒▓▒▒▒▒▒▒▓▓░░░░─░░▓▒─█──');
+console.log('    ───░█▓▓▓░░░▓▓░░░░▓▓▒░▒▒▒░░░▓░░░▒▓▒▒█░─');
+console.log('    ░───░██▒░░░░░░░░────────░░░░░░░░▓██▒──');
+console.log('    ░────▓▓▒░░▒░─▒▒▒░░░░░░░░░▒░░▒▒▒░▒▓▓───');
+console.log('    ░───░▓▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█▓▓▓▓▓▒▒▓░──');
+console.log('    ────░▓▒░▓▒░░▒▒▓█▒─▓███▒░▓▓▒▒░─░█─▒▓▒──');
+console.log('    ░───▒▓▒░▓───────▒▒─▒█▒▒▒▒──────▓─▒▓▒──');
+console.log('    ░───▒▓░░▓▒▒▒▒▒▒▒▒▓░▓█▒░▒▒▒▒▒▒▒▒█─▒▓▒──');
+console.log('    ░───▒▓░─█▓████▓▓███▓▓███▓▓██████─░▓▒──');
+console.log('    ───░▓▓░─█▓████▒▓███▓▓███▓▒████▓█─░▓▓──');
+console.log('    ───▓░▒▓─█▓▒▒▒▒▒▒▒▒▒▓██▒▒▒▒▒▒▒▒▓█─▓▒▒▓─');
+console.log('    ──▒▓──▒▒██▓▓▓▓▓▓▓▓▓███▓▓▓▓▓▓▓███─▓──▓─');
+console.log('    ─▒█▒▒▓▓▓███████████████████████▓▓▓▒░▓▓');
+console.log('    ─░█▓▓▓▒────▓█▓▓██─────░██▓██░───░▓▓▓▓▓');
+console.log('    ────░░───────▒▓▒────────▒▓░───────▒░──');
+console.log('    ░────────────▒▓▒────────▒▓░───░───────');
+console.log('    ░────────────▒█▒───░────▓█░──░────────');
+console.log('    ░─░─────░────▒█▒──░─────▓█░─────░───░─');
+console.log('    ░░─░─░───░───▒█▒───░────▒▓░────────░─░');
+console.log('    ░───░─░─░────▒▓▒────────▒▓░───────░─░─');
+console.log('    ─────────────▒▒▓───░───░▓▒▓──────────░');
+console.log('    ░─░─░─────▒█▓█▓█▒──────▓█████▒────░─░─');
+console.log('    ─────░────█▓████▒──────▓███▓██───░─░──');
+console.log('    ░─░─░─────██████░──────▒██████──░───░─');
+console.log('    ──────────▓██▓░░──────────███▒────────');
+
+
 console.log('');
-console.log('================================================================================');
 console.log('');
-console.log('  ██╗███╗   ██╗ █████╗  ██████╗ █████╗ ██████╗      █████╗  ██████╗██╗██████╗');
-console.log('  ██║████╗  ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗    ██╔══██╗██╔════╝██║██╔══██╗');
-console.log('  ██║██╔██╗ ██║███████║██║     ███████║██████╔╝    ███████║██║     ██║██║  ██║');
-console.log('  ██║██║╚██╗██║██╔══██║██║     ██╔══██║██╔═══╝     ██╔══██║██║     ██║██║  ██║');
-console.log('  ██║██║ ╚████║██║  ██║╚██████╗██║  ██║██║         ██║  ██║╚██████╗██║██████╔╝');
-console.log('  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝         ╚═╝  ╚═╝ ╚═════╝╚═╝╚═════╝');
-console.log('');
-console.log('  ██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗███████╗██████╗');
-console.log('  ██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ █████╗  ██████╔╝');
-console.log('  ██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  ██╔══╝  ██╔══██╗');
-console.log('  ██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   ███████╗██║  ██║');
-console.log('  ╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚══════╝╚═╝  ╚═╝');
-console.log('');
-console.log('===============================================================================');
+console.log('=========================================================');
+console.log('       ____          _                 _       _   _   ');
+console.log('   ___|    \\ ___ ___| |___ _ _ ___ ___| |_ ___| |_| |_ ');
+console.log('  |___|  |  | -_| . | | . | | | -_|  _| . | . |  _|   |');
+console.log('      |____/|___|  _|_|___|_  |___|_| |___|___|_| |_|_|');
+console.log('                |_|       |___|                        ');
+console.log('=========================================================');
 console.log('');
 console.log('');
 console.log('======================');
@@ -68,10 +112,17 @@ console.log('======================');
 
 
 //run sequence
-runSequence('clone',function(){
+runSequence(
+    'clone',
+    'tables-pkg',
+    'find-sln',
+    'find-csproj',
+    'nuget-restore',
+    'msbuild'
+    ,function(){
     console.log('Ejecución terminada');
     // Manual cleanup
-    tmp.setGracefulCleanup();
+    //tmp.setGracefulCleanup();
 });
 
 });
@@ -90,11 +141,52 @@ var tablas_no_validas = [
 var folder_work = 'C:\\git-test-v4\\';
 const testFolder = folder_work+'db';
 
-gulp.task("msbuild", function() {
-    return gulp.src("C:/GitAcidLabs/gulp-example-project/src/GulpExampleProject/GulpExampleProject/GulpExampleProject.csproj")
+/*
+gulp.task('nuget-restore', function() {
+
+var nugetPath = 'C:\\Program Files\\Nuget\\nuget.exe';
+
+
+  return gulp.src('C:\\git-test-v5-clone\\gulp-example-project\\src\\GulpExampleProject\\GulpExampleProject.sln')
+    .pipe(nuget.restore({ nuget: nugetPath }));
+});*/
+
+gulp.task('nuget-restore', function() {
+
+var nugetPath = 'C:\\Program Files\\Nuget\\nuget.exe';
+
+
+  return gulp.src(sln)
+    .pipe(nuget.restore({ nuget: nugetPath }));
+});
+
+
+gulp.task("msbuild", function(cb) {
+
+    var url = gitfolder;
+
+    if (csjproj != '') {
+        return gulp.src(sln)
+            .pipe(msbuild({
+                stdout: true,
+                customArgs: ['/p:DeployOnBuild=true']
+            }));
+            cb();
+    } else {
+        console.log('No se encontro CSPROJ');
+    }
+});
+
+
+
+gulp.task("msbuild-anterior", function() {
+
+    var url = gitfolder;
+
+    return gulp.src('C:\\git-test-v5-clone\\gulp-example-project\\src\\GulpExampleProject\\GulpExampleProject\\GulpExampleProject.csproj')
         .pipe(msbuild({
             stdout: true,
-            customArgs: ['/p:DeployOnBuild=true','/p:OutputPath=C:\\gulp_deploy_test']
+            customArgs: ['/t:pack', '/t:restore','/p:DeployOnBuild=true','/p:OutputPath='+deployfolder]
         }));
 });
 
@@ -103,8 +195,39 @@ gulp.task("msbuild", function() {
 var folder_work_search = '../../git-test/';
 var testFolderSearch = folder_work_search+'db/';
 
+gulp.task('find-csproj',function(cb){
+    glob(gitfolder+"\\src\\*\\*\\*.csproj", {}, function (er, files) {
+      if (files != null && files[0] != null) {
+
+        if (fs.existsSync(files[0])) {
+            // Do something
+            console.log('CSPROJ encontrado');
+            csjproj = files[0];
+            cb();
+        }
+      }
+    })
+});
+
+gulp.task('find-sln',function(cb){
+    glob(gitfolder+"\\src\\*\\*.sln", {}, function (er, files) {
+      if (files != null && files[0] != null) {
+
+        if (fs.existsSync(files[0])) {
+            // Do something
+            console.log('SLN encontrado');
+            sln = files[0];
+            cb();
+        }
+      }
+    })
+});
+
 gulp.task('tables-pkg',function(cb){
-    console.log('Tables PKG en ejecución: '+testFolderSearch);
+
+    var dirEjecDb = gitfolder+'\\db\\';
+
+    console.log('Tables PKG en ejecución: '+dirEjecDb);
     findInFiles.find(
         "(from [A-Z.a-z_]+)|(FROM [A-Z.a-z_]+)"+
         "|(join [A-Z.a-z_]+)|(JOIN [A-Z.a-z_]+)"+
@@ -114,7 +237,7 @@ gulp.task('tables-pkg',function(cb){
         "|(insert INTO [A-Z.a-z_]+)"+
         "|(insert into [A-Z.a-z_]+)"+
         "|(INSERT INTO [A-Z.a-z_]+)"
-        , testFolderSearch, '.pkb$')
+        , dirEjecDb, '.pkb$')
     .then(function(results) {
         console.log('Resultados:');
 
@@ -155,7 +278,7 @@ gulp.task('tables-pkg',function(cb){
             table_list.push(item_result);
         }
 
-        console.log(table_list);
+        //console.log(table_list);
 
         var fs = require('fs')
         var logger = fs.createWriteStream('./log.txt', {
@@ -184,7 +307,8 @@ gulp.task('tables-pkg',function(cb){
             logger.write('\r\n\r\n');
         }
         logger.end();
-
+        console.log('Tablas escritas');
+        cb();
 
     });
 });

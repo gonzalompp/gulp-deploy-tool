@@ -10,6 +10,9 @@ var msbuild = require("gulp-msbuild");
 var tmp = require('tmp');
 var fs = require('fs');
 var nuget = require('gulp-nuget');
+var ncp = require('ncp').ncp;
+var nugetRestore = require('gulp-nuget-restore');
+var cmd=require('node-cmd');
 
 var GulpDeployTest = 'C:\\gulp_deploy_test';
 var GitRepo = 'https://github.com/gonzalompp/gulp-example-project.git';
@@ -27,62 +30,11 @@ var tagVersion = ocName+'-'+descDeploy+'-'+tagName;
 // TEMP FOLDERS
 var tmpobj = tmp.dirSync();
 var gitfolder = tmpobj.name+'\\git\\';
-var deployfolder = tmpobj.name+'\deploy\\';
+var deployfolder = tmpobj.name+'\\deploy';
 var csjproj = '';
 var sln = '';
 
 gulp.task('deploy', function(){
-console.log('');
-console.log('    ░─░──░▓░─░▓▓▓▒─░▒▓▓▒░░▓▓▓░░▒▓▓▓─░▒░───');
-console.log('    ─────▒▒▒▒░░─░▒▒▒───▒▒░──░▒▒░──▒▒▒▒▒───');
-console.log('    ░───▒▓──░░░░░─░░░░░░░░░░░░░░░░░░─░▓▒──');
-console.log('    ░───▒▓░░░░░▒░░░▒▒▒░▒░▒░░░░░▒▒▒░░░▒▓▒──');
-console.log('    ░────▓▒──▒░─░─░░░░░░░──░░░░░░░░░░▒█───');
-console.log('    ─────▓▓░▒▓▒▒▒▒▒▒▒░░──░▒▒░░────▒▒─░▒───');
-console.log('    ░───▓█▓█████████████▓████████████▓██──');
-console.log('    ────▓█▓██████████████████████████▓██──');
-console.log('    ░────▓██░─────────▒███─────░▒▒▒▒███▒──');
-console.log('    ░────▒██▒────░▓▓▒─▓███─░▓▓──────██▒───');
-console.log('    ─────░▒██────▓███▒█▒─█▓▓██▓░───██▓────');
-console.log('    ░────▒▒██▒─▒░▒██▓▓█──██▒█▓▓─░░░██▓▒───');
-console.log('    ─────▓▒▓█▓▒▒▒▒▒▒─██░─██─▒▒▒▒▒▒▒██▓▒───');
-console.log('    ░─░──░▓▒█░▒▒▒▒▒▒▒██▒─██▒░░▒▒▒▒░▒█▓░───');
-console.log('    ─░────▓░▓▒▒▓░▓█████▒▒▓████░░▓▓░▒▒▓───░');
-console.log('    ░─────▒─░▒░▓─▓██▓▒░─▓▒▒▓██▒─▓▒▒▒▒▓────');
-console.log('    ─░───░▓░░░─▒▓──────░▓▒─────▓▒─░░░▓░──░');
-console.log('    ░─░──░▓▒░░░░▓▓░─░░░░▒▒░──░▓▓░░▒░░▓░───');
-console.log('    ░░────▓▓░░░░░▓▓▓▒────░─▒▓▓▒░░▒░░░▓────');
-console.log('    ░─────▓▒░░░░░░░▓▓█▓▓▓▓█▓▓░░░░░░░▓▓────');
-console.log('    ░────▓▓░░░░░░▒░─░▓─▓█─▓▒─░░░▒▓▓░▒▓▓───');
-console.log('    ░───░▓▒░░▒▓░▒░░░░▓░▓█─▓▓─░░░▓▓▓─▒▒▓▒──');
-console.log('    ░───▓░▒░░░▒░▒░░▒░▓▓▓▓▓▓░▒░░░▓▓░░▒▒░▓──');
-console.log('    ░───▓─▒▓░░░▓▓░░▒▓▒▒▒▒▒▒▓▓░░░░─░░▓▒─█──');
-console.log('    ───░█▓▓▓░░░▓▓░░░░▓▓▒░▒▒▒░░░▓░░░▒▓▒▒█░─');
-console.log('    ░───░██▒░░░░░░░░────────░░░░░░░░▓██▒──');
-console.log('    ░────▓▓▒░░▒░─▒▒▒░░░░░░░░░▒░░▒▒▒░▒▓▓───');
-console.log('    ░───░▓▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█▓▓▓▓▓▒▒▓░──');
-console.log('    ────░▓▒░▓▒░░▒▒▓█▒─▓███▒░▓▓▒▒░─░█─▒▓▒──');
-console.log('    ░───▒▓▒░▓───────▒▒─▒█▒▒▒▒──────▓─▒▓▒──');
-console.log('    ░───▒▓░░▓▒▒▒▒▒▒▒▒▓░▓█▒░▒▒▒▒▒▒▒▒█─▒▓▒──');
-console.log('    ░───▒▓░─█▓████▓▓███▓▓███▓▓██████─░▓▒──');
-console.log('    ───░▓▓░─█▓████▒▓███▓▓███▓▒████▓█─░▓▓──');
-console.log('    ───▓░▒▓─█▓▒▒▒▒▒▒▒▒▒▓██▒▒▒▒▒▒▒▒▓█─▓▒▒▓─');
-console.log('    ──▒▓──▒▒██▓▓▓▓▓▓▓▓▓███▓▓▓▓▓▓▓███─▓──▓─');
-console.log('    ─▒█▒▒▓▓▓███████████████████████▓▓▓▒░▓▓');
-console.log('    ─░█▓▓▓▒────▓█▓▓██─────░██▓██░───░▓▓▓▓▓');
-console.log('    ────░░───────▒▓▒────────▒▓░───────▒░──');
-console.log('    ░────────────▒▓▒────────▒▓░───░───────');
-console.log('    ░────────────▒█▒───░────▓█░──░────────');
-console.log('    ░─░─────░────▒█▒──░─────▓█░─────░───░─');
-console.log('    ░░─░─░───░───▒█▒───░────▒▓░────────░─░');
-console.log('    ░───░─░─░────▒▓▒────────▒▓░───────░─░─');
-console.log('    ─────────────▒▒▓───░───░▓▒▓──────────░');
-console.log('    ░─░─░─────▒█▓█▓█▒──────▓█████▒────░─░─');
-console.log('    ─────░────█▓████▒──────▓███▓██───░─░──');
-console.log('    ░─░─░─────██████░──────▒██████──░───░─');
-console.log('    ──────────▓██▓░░──────────███▒────────');
-
-
 console.log('');
 console.log('');
 console.log('=========================================================');
@@ -100,7 +52,7 @@ console.log('======================');
 console.log('');
 console.log('EJECUCIÓN   : '+formattedDate);
 console.log('REPOSITORIO : '+GitRepo);
-console.log('DEPLOY TO   : '+GulpDeployTest);
+console.log('DEPLOY TO   : '+deployfolder);
 console.log('TAG NAME    : '+tagName);
 console.log('TEMP FOLDER : '+tmpobj.name);
 console.log('');
@@ -118,7 +70,7 @@ runSequence(
     'find-sln',
     'find-csproj',
     'nuget-restore',
-    'msbuild'
+    'build'
     ,function(){
     console.log('Ejecución terminada');
     // Manual cleanup
@@ -151,44 +103,105 @@ var nugetPath = 'C:\\Program Files\\Nuget\\nuget.exe';
     .pipe(nuget.restore({ nuget: nugetPath }));
 });*/
 
+gulp.task('copy-publish', function(cb) {
+
+    ncp(deployfolder, 'C:\\final_deploy', function (err) {
+     if (err) {
+       return console.error(err);
+     }
+     console.log('done!');
+     cb();
+    });
+
+});
+/*
 gulp.task('nuget-restore', function() {
 
 var nugetPath = 'C:\\Program Files\\Nuget\\nuget.exe';
 
+console.log('SLN: '+sln);
 
   return gulp.src(sln)
-    .pipe(nuget.restore({ nuget: nugetPath }));
+    .pipe(nuget.restore({
+        nuget: nugetPath
+    }).pipe());
+});
+*/
+gulp.task('nuget-restore',function(cb){
+    let command = 'nuget restore '+sln;
+    console.log('COMMAND: '+command);
+    cmd.get(
+        command,
+        function(err, data, stderr){
+            console.log('ejecutooooo');
+            if (err) {
+                console.log("ERROR:");
+                console.log(stderr);
+            }
+            console.log(stderr);
+            console.log(err);
+            console.log('NUGET RESTORE :\n\n',data);
+            cb();
+        }
+    );
+});
+
+gulp.task('build',function(cb){
+    cmd.get(
+        'msbuild '+sln,
+        function(err, data, stderr){
+            if (err) {
+                console.log("ERROR:");
+                console.log(stderr);
+            }
+
+            console.log('MSBUILD :\n\n',data);
+            cb();
+        }
+    );
 });
 
 
+gulp.task('build-antiguo2', function () {
+    return gulp.src(sln)
+        .pipe(nugetRestore())
+        .pipe(msbuild({
+            targets: ['Clean', 'Build'],
+            toolsVersion: 14.0}
+          ));
+});
+
+
+gulp.task('build-antiguo', function () {
+    console.log('BUILD: '+sln);
+    return gulp.src(sln)
+        .pipe(nugetRestore())
+        .pipe(msbuild({
+            stdout: true,
+            customArgs: ['/p:DeployOnBuild=true','/p:Configuration=Release']
+        }));
+});
+
+
+/*
 gulp.task("msbuild", function(cb) {
 
     var url = gitfolder;
 
     if (csjproj != '') {
-        return gulp.src(sln)
+        return gulp.src(csjproj)
             .pipe(msbuild({
                 stdout: true,
-                customArgs: ['/p:DeployOnBuild=true']
+                customArgs: ['/p:DeployOnBuild=true','/p:Configuration=Release' ,'/p:OutputPath='+deployfolder]
             }));
             cb();
     } else {
         console.log('No se encontro CSPROJ');
     }
 });
+*/
 
 
-
-gulp.task("msbuild-anterior", function() {
-
-    var url = gitfolder;
-
-    return gulp.src('C:\\git-test-v5-clone\\gulp-example-project\\src\\GulpExampleProject\\GulpExampleProject\\GulpExampleProject.csproj')
-        .pipe(msbuild({
-            stdout: true,
-            customArgs: ['/t:pack', '/t:restore','/p:DeployOnBuild=true','/p:OutputPath='+deployfolder]
-        }));
-});
 
 
 
@@ -196,28 +209,32 @@ var folder_work_search = '../../git-test/';
 var testFolderSearch = folder_work_search+'db/';
 
 gulp.task('find-csproj',function(cb){
-    glob(gitfolder+"\\src\\*\\*\\*.csproj", {}, function (er, files) {
+    glob(gitfolder+"\\src\\*\\*.Web.csproj", {}, function (er, files) {
       if (files != null && files[0] != null) {
 
         if (fs.existsSync(files[0])) {
             // Do something
-            console.log('CSPROJ encontrado');
+            console.log('CSPROJ encontrado: '+files[0]);
             csjproj = files[0];
             cb();
+        } else {
+            console.log('CSPROJ no encontrado');
         }
       }
     })
 });
 
 gulp.task('find-sln',function(cb){
-    glob(gitfolder+"\\src\\*\\*.sln", {}, function (er, files) {
+    glob(gitfolder+"\\src\\*.sln", {}, function (er, files) {
       if (files != null && files[0] != null) {
 
         if (fs.existsSync(files[0])) {
             // Do something
-            console.log('SLN encontrado');
+            console.log('SLN encontrado: '+sln);
             sln = files[0];
             cb();
+        } else {
+            console.log('SLN no encontrado');
         }
       }
     })
